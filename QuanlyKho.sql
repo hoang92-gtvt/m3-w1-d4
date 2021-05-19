@@ -145,3 +145,89 @@ alter table chitietdh
 
 alter table chitietdh
     add constraint foreign key (SoDH) references DonDH(SoDH);
+
+insert into chitietpn(numberpn, sopn, mavt, soluong, gianhap, note) value
+    ('1', 1, 2,100,30,'Don hang 01'),
+('2', 2, 1,100,20,'Don hang 02'),
+('3', 3, 3,100,200,'Don hang 03'),
+('4', 2, 6,100,300,'Don hang 04'),
+('5', 1, 7,100,10,'Don hang 05'),
+('6', 3, 6,80,300,'Don hang 02');
+
+insert into chitietPx(numberpx, sopx, mavt, soluong, giaxuat, note) value
+    ('1',1, 3 ,3,220,'tang10%'),
+('2',2, 4 ,4,55,'tang10%'),
+('3',3, 2 ,5,33,'tang10%'),
+('4',4, 6 ,6,330,'tang10%'),
+('5',3, 7 ,7,11,'tang10%'),
+('6',1, 2 ,3,33,'tang10%');
+
+
+select PhieuNhap.SoPN , PhieuNhap.MaPN, MaVT, Soluong, GiaNhap, GiaNhap*soluong as Thanhtien
+from chitietpn
+         join PhieuNhap on ChiTietPN.SoPN = PhieuNhap.SoPN;
+
+select PhieuNhap.SoPN , PhieuNhap.MaPN, ChiTietPN.MaVT, V.TenVT, Soluong, GiaNhap, GiaNhap*soluong as Thanhtien
+from chitietpn
+         join PhieuNhap on ChiTietPN.SoPN = PhieuNhap.SoPN
+         join VATTU V on ChiTietPN.MaVT = V.MaVT
+;
+
+select PhieuNhap.SoPN , PhieuNhap.MaPN, PhieuNhap.SoDH, PhieuNhap.NgayNhap, ChiTietPN.MaVT, V.TenVT, Soluong, GiaNhap, GiaNhap*soluong as Thanhtien
+from chitietpn
+         join PhieuNhap on ChiTietPN.SoPN = PhieuNhap.SoPN
+         join VATTU V on ChiTietPN.MaVT = V.MaVT
+;
+
+select PhieuNhap.SoPN , PhieuNhap.MaPN, PhieuNhap.SoDH, PhieuNhap.NgayNhap,NCC.TenNCC, ChiTietPN.MaVT, V.TenVT, Soluong, GiaNhap, GiaNhap*soluong as Thanhtien
+from chitietpn
+         join PhieuNhap on ChiTietPN.SoPN = PhieuNhap.SoPN
+         join VATTU V on ChiTietPN.MaVT = V.MaVT
+         join DonDH DD on PhieuNhap.SoDH = DD.SoDH
+         join NhaCungCap NCC on DD.IDNCC = NCC.IDNCC
+;
+
+select * ,soluong*Gianhap as thanhtien
+from ChiTietPN
+where soluong>=5
+;
+
+select * ,soluong*Gianhap as thanhtien
+from ChiTietPN
+where ChitietPN.MaVT= All(select VATTU.MaVT
+                          from vattu
+                          where vattu.Donvitinh= 'cái')
+;
+
+select * ,soluong*Gianhap as thanhtien
+from ChiTietPN
+         join vattu v on ChiTietPN.MaVT = v.MaVT
+where v.Donvitinh= 'cái'
+;
+
+
+select * , soluong*Giaxuat as thanhtien
+from chitietpx
+;
+
+select *, soluong*Giaxuat as thanhtien
+from chitietpx
+         join (select VATTU.TenVT, VATTU.MaVT
+               from VATTU)as VT
+              On VT.MaVT=ChiTietPX.MaVT
+;
+
+select *, soluong*Giaxuat as thanhtien
+from chitietpx,(select VATTU.TenVT, VATTU.MaVT
+                from VATTU
+)as VT
+where VT.MaVT=ChiTietPX.MaVT
+;
+
+select PhieuXuat.SoPX, TenKH, V.MaVT, TenVT, soluong, GiaXuat
+from chitietpx
+         join phieuxuat
+              on ChiTietPX.SoPx = PhieuXuat.SoPX
+         join VATTU V on ChiTietPX.MaVT = V.MaVT
+
+;
