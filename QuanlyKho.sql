@@ -231,3 +231,160 @@ from chitietpx
          join VATTU V on ChiTietPX.MaVT = V.MaVT
 
 ;
+
+DELIMITER //
+create procedure getProductByDVT (in input nvarchar(50))
+Begin
+select * ,soluong*Gianhap as thanhtien
+from ChiTietPN
+         join vattu v on ChiTietPN.MaVT = v.MaVT
+where v.Donvitinh= input;
+
+End //
+DELIMITER ;
+
+call getProductByDVT('cuộn');
+call getProductByDVT('cái');
+
+
+
+create view CTPNHAP as
+select MaPN, MaVT, soluong, GiaNhap, soluong*GiaNhap as thanhtien
+from ChiTietPN
+         join PhieuNhap on ChiTietPN.SoPN = PhieuNhap.SoPN;
+
+select * from CTPNHAP;
+
+create view CTPNHAP_VT as
+select MaPN,  TenVT, soluong, gianhap, soluong*gianhap as thanhtien
+from chitietpn
+         join phieunhap p on ChiTietPN.SoPN = p.SoPN
+         join vattu v on ChiTietPN.MaVT = v.MaVT;
+
+select * from CTPNHAP_VT;
+
+create view CTPNHAP_VT_PN as
+select MaPN, NgayNhap,  TenVT, soluong, gianhap, soluong*gianhap as thanhtien
+from chitietpn
+         join phieunhap p on ChiTietPN.SoPN = p.SoPN
+         join vattu v on ChiTietPN.MaVT = v.MaVT;
+
+select * from CTPNHAP_VT_PN;
+
+create view CTPNHAP_VT_PN_DH as
+select MaPN, NgayNhap,TenNCC,  TenVT, soluong, gianhap, soluong*gianhap as thanhtien
+from chitietpn
+         join phieunhap p on ChiTietPN.SoPN = p.SoPN
+         join vattu v on ChiTietPN.MaVT = v.MaVT
+         join DonDH DD on p.SoDH = DD.SoDH
+         join NhaCungCap Ncc on DD.IDNCC=NCC.IDNCC ;
+
+select * from CTPNHAP_VT_PN_DH;
+
+create view CTPNHAP_LOC as
+select MaPN, MaVT, soluong, GiaNhap, soluong*GiaNhap as thanhtien
+from ChiTietPN
+         join PhieuNhap on ChiTietPN.SoPN = PhieuNhap.SoPN
+where soluong >=5   ;
+
+select * from CTPNHAP_LOC;
+
+
+create view CTPNHAP_VT_LOC as
+select MaPN,  TenVT, soluong, gianhap, soluong*gianhap as thanhtien
+from chitietpn
+         join phieunhap p on ChiTietPN.SoPN = p.SoPN
+         join vattu v on ChiTietPN.MaVT = v.MaVT
+where Donvitinh ='bộ'     ;
+
+select * from CTPNHAP_VT_Loc;
+
+create view CTPXUAT as
+select MaPX, MaVT, soluong, Giaxuat, soluong*giaxuat as thanhtien
+from chitietpx
+         join phieuxuat on ChiTietPX.SoPx = PhieuXuat.SoPX;
+
+select * from ctpxuat;
+
+create view CTPxuat_VT as
+select MaPX, v.MaVT, TenVT,  soluong, Giaxuat, soluong*giaxuat as thanhtien
+from chitietpx
+         join phieuxuat on ChiTietPX.SoPx = PhieuXuat.SoPX
+         join vattu v on ChiTietPX.MaVT = v.MaVT   ;
+
+select * from ctpxuat_vt;
+
+create view CTPxuat_VT_PX as
+select MaPX,TenKH, v.MaVT, TenVT,  soluong, Giaxuat, soluong*giaxuat as thanhtien
+from chitietpx
+         join phieuxuat on ChiTietPX.SoPx = PhieuXuat.SoPX
+         join vattu v on ChiTietPX.MaVT = v.MaVT   ;
+
+select * from ctpxuat_VT_PX;
+
+
+create procedure getSoLuongByMAVT(in inputTen varchar(30))
+begin
+select V.tenVT,sum(ChiTietPX.GiaXuat*ChiTietPX.soluong)as TongTien
+from chitietpx
+         join vattu v on ChiTietPX.MaVT = v.MaVT
+group by tenVT
+having V.tenVT= InputTen;
+end;
+
+
+
+
+create procedure getMoneyByTenVT(in inputTen varchar(30))
+begin
+select V.tenVT,sum(ChiTietPX.GiaXuat*ChiTietPX.soluong)as TongTien
+from chitietpx
+         join vattu v on ChiTietPX.MaVT = v.MaVT
+group by tenVT
+having V.tenVT= InputTen;
+end;
+
+
+drop procedure getMoneyByTenVT;
+
+call getMoneyByTenVT('Dây Điện');
+call getMoneyByTenVT('Kéo');
+
+# create procedure getSoluongTonKhoOfMaVT(int inputMaVT)
+    # begin
+#     select *
+                       #         from KhoVatTu
+                                          #             inner join VATTU on KhoVatTu.MaVT = VATTU.MaVT
+                #             inner join ChiTietPX on VATTU.MaVT = ChiTietPX.MaVT
+                #             inner join chitietPN on VATTU.MaVT= ChiTietPN.MaVT
+                #             group by VATTU.MaVT;
+#
+# end;
+create view ThongKeNhapXuat as
+select VATTU.MaVT as MaVT, VATTU.TenVT as TenVT, sum(ChiTietPN.soluong) as SLnhap, sum(ChiTietPX.soluong) as SLxuat
+from vattu
+         left join ChiTietPX on VATTU.MaVT = ChiTietPX.MaVT
+         left  join chitietPN on VATTU.MaVT= ChiTietPN.MaVT
+group by VATTU.MaVT;
+
+create view HieuSo as
+select MaVT, TenVT,coalesce(slnhap,0)-coalesce(SLxuat,0) as SlTon
+from ThongKeNhapXuat ;
+
+create view UpdateKHoVT as
+select Khovattu.MaVT as MaVT, h.TenVT as TenVT, KhoVatTu.SLVT+h.SlTon as SLTon, KhoVatTu.SLNHAP+ coalesce(t.SLnhap,0)as SLnhap, KhoVatTu.SLXUAT+ coalesce(t.SLxuat,0) as SLxuat
+from KhoVatTu
+         join thongkenhapxuat t on KhoVatTu.MaVT = t.MaVT
+         join hieuso h on KhoVatTu.MaVT = h.MaVT;
+
+
+delimiter @@
+create procedure getSLtonbyMaVT(in inputMaVT int)
+begin
+select *
+from UpdateKHoVT
+where MaVT= inputMaVT;
+end @@
+delimiter ;
+
+call getSLtonbyMaVT(1);
